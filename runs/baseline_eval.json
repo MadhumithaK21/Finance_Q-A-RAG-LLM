@@ -1,0 +1,78 @@
+{
+  "exact_accuracy": 0.0,
+  "tolerant_accuracy": 0.0,
+  "avg_logprob": -9.78197078704834,
+  "avg_latency_s": 2.870091128349304,
+  "details": [
+    {
+      "q": "What was the cash collateral payable in 2020?",
+      "gold": "$25550000",
+      "pred": "",
+      "lp": -8.258706092834473,
+      "latency": 6.013322591781616
+    },
+    {
+      "q": "What was the due for securities purchased in 2020?",
+      "gold": "$206461",
+      "pred": "",
+      "lp": -9.48171615600586,
+      "latency": 1.4167895317077637
+    },
+    {
+      "q": "What was the benefits and participant loans payable in 2020?",
+      "gold": "$168328",
+      "pred": "",
+      "lp": -9.841418266296387,
+      "latency": 8.762268781661987
+    },
+    {
+      "q": "What was the other assets in 2020?",
+      "gold": "$1932",
+      "pred": "$1.5",
+      "lp": -9.254652976989746,
+      "latency": 1.6512701511383057
+    },
+    {
+      "q": "What was the due for securities sold in 2021?",
+      "gold": "$379711",
+      "pred": "",
+      "lp": -9.534780502319336,
+      "latency": 1.8706281185150146
+    },
+    {
+      "q": "What was the administrative expenses in 2020?",
+      "gold": "$368358",
+      "pred": "$1.5",
+      "lp": -10.590729713439941,
+      "latency": 1.748826265335083
+    },
+    {
+      "q": "What was the total liabilities in 2021?",
+      "gold": "$16156173",
+      "pred": "$1.5",
+      "lp": -10.277894020080566,
+      "latency": 1.8863582611083984
+    },
+    {
+      "q": "What was the total fixed assets in 2020?",
+      "gold": "$9088",
+      "pred": "$1.5",
+      "lp": -10.299429893493652,
+      "latency": 1.556135892868042
+    },
+    {
+      "q": "What was the net appreciation of investments in 2020?",
+      "gold": "$66046046",
+      "pred": "$1.5",
+      "lp": -10.60114574432373,
+      "latency": 1.8585641384124756
+    },
+    {
+      "q": "What was the accrued payroll and benefits in 2021?",
+      "gold": "$5757",
+      "pred": "$1.5",
+      "lp": -9.679234504699707,
+      "latency": 1.9367475509643555
+    }
+  ]
+}

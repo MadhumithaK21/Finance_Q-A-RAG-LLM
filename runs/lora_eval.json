@@ -1,0 +1,78 @@
+{
+  "exact_accuracy": 0.0,
+  "tolerant_accuracy": 0.0,
+  "avg_logprob": -9.412147903442383,
+  "avg_latency_s": 1.3771073341369628,
+  "details": [
+    {
+      "q": "What was the cash collateral payable in 2020?",
+      "gold": "$25550000",
+      "pred": "$1,000,000",
+      "lp": -9.576441764831543,
+      "latency": 1.3452422618865967
+    },
+    {
+      "q": "What was the due for securities purchased in 2020?",
+      "gold": "$206461",
+      "pred": "$1.5",
+      "lp": -9.109792709350586,
+      "latency": 1.3022098541259766
+    },
+    {
+      "q": "What was the benefits and participant loans payable in 2020?",
+      "gold": "$168328",
+      "pred": "$1,",
+      "lp": -9.676919937133789,
+      "latency": 1.3348758220672607
+    },
+    {
+      "q": "What was the other assets in 2020?",
+      "gold": "$1932",
+      "pred": "$1.",
+      "lp": -8.322327613830566,
+      "latency": 1.3914995193481445
+    },
+    {
+      "q": "What was the due for securities sold in 2021?",
+      "gold": "$379711",
+      "pred": "$1.5",
+      "lp": -9.444762229919434,
+      "latency": 1.460904836654663
+    },
+    {
+      "q": "What was the administrative expenses in 2020?",
+      "gold": "$368358",
+      "pred": "$1,000,000",
+      "lp": -9.925281524658203,
+      "latency": 1.396932601928711
+    },
+    {
+      "q": "What was the total liabilities in 2021?",
+      "gold": "$16156173",
+      "pred": "$1.5",
+      "lp": -9.093573570251465,
+      "latency": 1.320317268371582
+    },
+    {
+      "q": "What was the total fixed assets in 2020?",
+      "gold": "$9088",
+      "pred": "$1.5",
+      "lp": -9.01840877532959,
+      "latency": 1.354797124862671
+    },
+    {
+      "q": "What was the net appreciation of investments in 2020?",
+      "gold": "$66046046",
+      "pred": "$1.5",
+      "lp": -9.753499031066895,
+      "latency": 1.4658851623535156
+    },
+    {
+      "q": "What was the accrued payroll and benefits in 2021?",
+      "gold": "$5757",
+      "pred": "$1,849,000",
+      "lp": -10.200471878051758,
+      "latency": 1.3984088897705078
+    }
+  ]
+}
