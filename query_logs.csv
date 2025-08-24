@@ -1,0 +1,5 @@
+Question,Method,Answer,Confidence,Time (s),Correct (Y/N)
+What were the Total receivables  in 2020?,Fine-Tuned + GT,"$11,295,953",0.9969,20.06,Y
+What were the  total fixed assets in 2021?,RAG,"5,306",0.5584,107.73,Y
+What was the company's revenue in 2023?,RAG,"$11,149,628",0.4027,95.33,
+What was the net profit in 2023?,Fine-Tuned + GT,"$94,122,093",0.6861,3.93,
