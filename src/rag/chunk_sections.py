@@ -5,16 +5,25 @@ from segment_sections import segment_tsp_sections
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 
+
 def chunk_sections(pdf_path, chunk_sizes=[500, 1000], chunk_overlap=200):
     """
     Split the PDF into multiple chunk sizes for dual indexing.
-    Each chunk stores metadata about its section, size, and unique ID.
+    Each chunk stores metadata about its section, chunk size, and a unique ID.
+    Args:
+        pdf_path (str): Path to the PDF file.
+        chunk_sizes (list): List of chunk sizes (in tokens/characters) to use for splitting.
+        chunk_overlap (int): Overlap size between chunks.
+    Returns:
+        list: All chunked Document objects with metadata.
     """
+    # Load and clean the PDF, then segment into logical sections
     docs = load_and_clean(pdf_path)
     sections = segment_tsp_sections(docs)
 
     all_chunks = []
 
+    # For each chunk size, split each section and add metadata
     for size in chunk_sizes:
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=size,
@@ -32,6 +41,8 @@ def chunk_sections(pdf_path, chunk_sizes=[500, 1000], chunk_overlap=200):
     return all_chunks
 
 
+
+# chunk a sample PDF and print info about the chunks
 if __name__ == "__main__":
     pdf_path = os.path.join("data", "statements", "TSP-FS-Dec2021.pdf")
     chunks = chunk_sections(pdf_path)

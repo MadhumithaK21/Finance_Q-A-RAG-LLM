@@ -1,4 +1,6 @@
 # app.py
+
+# --- Standard library imports ---
 import os
 import time
 import re
@@ -6,13 +8,14 @@ import csv
 import json
 from datetime import datetime
 
+# --- Third-party imports ---
 import streamlit as st
 import numpy as np
 
 # --- External deps used by your existing project ---
 from src.rag.rag_chain import get_rag_qa
 
-# Fine-tune (optional: will load if present)
+# --- Fine-tune (optional: will load if present) ---
 try:
     from src.finetune.finetune_wrapper import load_finetuned_model, get_finetuned_answer
     FT_AVAILABLE = True
@@ -23,6 +26,9 @@ LOG_FILE = "query_logs.csv"
 
 # ----------------------------- Helpers -----------------------------
 def normalize_rag_return(rag_ret):
+    """
+    Normalize the return value from get_rag_qa to extract chain and vector_store.
+    """
     chain = None
     vector_store = None
     if hasattr(rag_ret, "invoke"):
@@ -39,6 +45,9 @@ def normalize_rag_return(rag_ret):
 
 
 def extract_value_only(text: str) -> str:
+    """
+    Extract only the value (number, currency, percent) from the answer text.
+    """
     s = (text or "").strip()
     if s.lower().startswith("not found"):
         return "Not found"
@@ -61,6 +70,9 @@ def extract_value_only(text: str) -> str:
 
 
 def score_to_conf(score):
+    """
+    Convert a similarity score to a confidence value between 0 and 1.
+    """
     try:
         if score is None:
             return None
@@ -74,6 +86,9 @@ def score_to_conf(score):
 
 
 def color_for_conf(c):
+    """
+    Return a color string based on confidence value.
+    """
     if c is None:
         return "gray"
     if c >= 0.70:
@@ -84,6 +99,9 @@ def color_for_conf(c):
 
 
 def infer_page_number(doc):
+    """
+    Try to infer the page number from a document's metadata or content.
+    """
     meta = getattr(doc, "metadata", {}) or {}
     for key in ("page", "page_number", "page_num"):
         if key in meta and meta[key] not in (None, ""):
@@ -106,6 +124,9 @@ def infer_page_number(doc):
 
 
 def ensure_log_header(path):
+    """
+    Ensure the CSV log file has a header row.
+    """
     if not os.path.exists(path):
         with open(path, mode="w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
@@ -114,6 +135,9 @@ def ensure_log_header(path):
 
 # -------- Similarity helpers --------
 def _embed_with_sentence_transformers(texts):
+    """
+    Embed texts using SentenceTransformers (SBERT).
+    """
     try:
         from sentence_transformers import SentenceTransformer
         model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -124,6 +148,9 @@ def _embed_with_sentence_transformers(texts):
 
 
 def _embed_with_tfidf(texts):
+    """
+    Embed texts using TF-IDF vectorizer.
+    """
     try:
         from sklearn.feature_extraction.text import TfidfVectorizer
         vec = TfidfVectorizer(ngram_range=(1, 2), min_df=1)
@@ -135,6 +162,9 @@ def _embed_with_tfidf(texts):
 
 
 def _simple_overlap_score(q, d):
+    """
+    Compute a simple token overlap score between question and document.
+    """
     q_tokens = set(re.findall(r"[A-Za-z0-9%$€£\.]+", (q or "").lower()))
     d_tokens = set(re.findall(r"[A-Za-z0-9%$€£\.]+", (d or "").lower()))
     if not q_tokens or not d_tokens:
@@ -145,11 +175,17 @@ def _simple_overlap_score(q, d):
 
 
 def cosine_sim(a, b):
+    """
+    Compute cosine similarity between two vectors.
+    """
     denom = (np.linalg.norm(a) * np.linalg.norm(b)) + 1e-12
     return float(np.dot(a, b) / denom)
 
 
 def compute_confidence(question, top_docs_with_scores, source_docs):
+    """
+    Compute a confidence score for the answer based on retrieval or semantic similarity.
+    """
     conf_vals = []
     for _, sc in (top_docs_with_scores or [])[:5]:
         conf = score_to_conf(sc)
@@ -186,6 +222,9 @@ def compute_confidence(question, top_docs_with_scores, source_docs):
 
 # -------- Ground-truth loading & matching --------
 def _canonicalize(text: str) -> str:
+    """
+    Canonicalize text for matching (lowercase, remove punctuation, etc).
+    """
     t = (text or "").lower().strip()
     t = re.sub(r"[-_/]", " ", t)
     t = re.sub(r"[^\w\s%$€£]", " ", t)
@@ -195,6 +234,9 @@ def _canonicalize(text: str) -> str:
 
 @st.cache_resource
 def load_ground_truth(path="data/ft/finetune_dataset_short.jsonl"):
+    """
+    Load ground-truth questions and answers from a JSONL file.
+    """
     qs, as_, canon_qs = [], [], []
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -216,6 +258,9 @@ def load_ground_truth(path="data/ft/finetune_dataset_short.jsonl"):
 
 
 def match_ground_truth(user_q: str):
+    """
+    Match the user's question to the closest ground-truth question and return its answer.
+    """
     if not user_q.strip():
         return None, None, None
     gt_qs, gt_as, gt_canon_qs = load_ground_truth()
@@ -249,6 +294,9 @@ def match_ground_truth(user_q: str):
 
 
 def enforce_currency_symbol(val: str, preferred: str = "$") -> str:
+    """
+    Ensure the answer value uses the preferred currency symbol.
+    """
     if not val:
         return val
     m = re.match(r"^\s*([$£€])\s*(.*)$", val)
@@ -261,6 +309,9 @@ def enforce_currency_symbol(val: str, preferred: str = "$") -> str:
 # ------------------------ Cached loaders ------------------------
 @st.cache_resource
 def load_rag():
+    """
+    Load the RAG chain and vector store.
+    """
     rag_ret = get_rag_qa()
     chain, vstore = normalize_rag_return(rag_ret)
     return chain, vstore
@@ -268,6 +319,9 @@ def load_rag():
 
 @st.cache_resource
 def load_ft():
+    """
+    Load the fine-tuned model and tokenizer, if available.
+    """
     if not FT_AVAILABLE:
         return None, None
     try:
@@ -278,6 +332,9 @@ def load_ft():
 
 # Helper to extract year from question
 def extract_year_from_question(q):
+    """
+    Extract a 4-digit year from the question string.
+    """
     m = re.search(r"\b(20\d{2})\b", q)
     if m:
         return m.group(1)
@@ -287,10 +344,12 @@ def extract_year_from_question(q):
 VALID_YEARS = {"2020", "2021"}
 
 # ----------------------------- UI -----------------------------
+# Set up Streamlit page configuration and title
 st.set_page_config(page_title="Financial QA – RAG vs Fine-Tune", layout="wide")
 st.title("Financial Statements Q&A — RAG vs Fine-Tune")
 st.caption("Answer format: values only (keep currency/units/percent).")
 
+# --- Top controls: method selection and ground-truth fallback ---
 col_top_1, col_top_2 = st.columns([1, 1])
 with col_top_1:
     method = st.radio("Select method:", ["RAG", "Fine-Tuned"], horizontal=True)
@@ -301,15 +360,19 @@ with col_top_2:
         help="Override with dataset answer when similarity is high."
     )
 
+# --- Question input ---
 question = st.text_input("Ask a question about the financial statements:")
 
+# --- Session state for last result ---
 if "last" not in st.session_state:
     st.session_state.last = None  # keys: question, method, answer, confidence, time_s, sources, notes
 
+# --- Run button ---
 colA, colB = st.columns([1, 1])
 with colA:
     run_btn = st.button("Get Answer", type="primary")
 
+# --- Output containers ---
 answer_box = st.empty()
 meta_box = st.empty()
 sources_box = st.container()
@@ -322,6 +385,7 @@ if run_btn:
         # Guardrail: Check if year in question is in dataset
         year = extract_year_from_question(question)
         if year and year not in VALID_YEARS:
+            # If year is not valid, show message and skip processing
             st.session_state.last = {
                 "question": question,
                 "method": method,
@@ -335,6 +399,7 @@ if run_btn:
             start = time.time()
 
             if method == "RAG":
+                # --- RAG method ---
                 rag_chain, vstore = load_rag()
                 if rag_chain is None:
                     st.error("RAG chain failed to load. Please check your RAG setup.")
@@ -347,10 +412,10 @@ if run_btn:
                         except Exception:
                             top_docs_with_scores = []
 
-                    # Invoke chain
+                    # Invoke chain to get answer
                     resp = rag_chain.invoke(question)
 
-                    # Extract answer
+                    # Extract answer value
                     raw_answer = resp["result"] if isinstance(resp, dict) and "result" in resp else str(resp)
                     answer_value = extract_value_only(raw_answer)
 
@@ -361,11 +426,12 @@ if run_btn:
                     elif top_docs_with_scores:
                         source_docs = [d for d, _ in top_docs_with_scores[:5]]
 
-                    # Confidence (prefer FAISS; else semantic fallback vs sources)
+                    # Compute confidence score
                     confidence = compute_confidence(question, top_docs_with_scores, source_docs)
 
                     elapsed = time.time() - start
 
+                    # Save result to session state
                     st.session_state.last = {
                         "question": question,
                         "method": "RAG",
@@ -377,6 +443,7 @@ if run_btn:
                     }
 
             else:  # Fine-Tuned
+                # --- Fine-tuned method ---
                 ft_model, ft_tok = load_ft()
                 if ft_model is None:
                     st.error("Fine-tuned model not available in this environment.")
@@ -408,6 +475,7 @@ if run_btn:
 
                     elapsed = time.time() - start
 
+                    # Save result to session state
                     st.session_state.last = {
                         "question": question,
                         "method": "Fine-Tuned" + (" + GT" if notes else ""),
@@ -422,9 +490,11 @@ if run_btn:
 if st.session_state.last:
     last = st.session_state.last
 
+    # --- Show answer ---
     answer_box.subheader("Answer")
     answer_box.success(last["answer"])
 
+    # --- Show meta info ---
     conf_txt = "—" if last["confidence"] is None else f"{last['confidence']:.4f}"
     conf_color = color_for_conf(last["confidence"])
     meta_lines = [
@@ -436,6 +506,7 @@ if st.session_state.last:
         meta_lines.append(f"**Notes:** {last['notes']}")
     meta_box.markdown("<br>".join(meta_lines), unsafe_allow_html=True)
 
+    # --- Show sources if RAG ---
     if last["method"].startswith("RAG"):
         with sources_box:
             st.subheader("Sources")
@@ -457,7 +528,7 @@ if st.session_state.last:
 
     st.divider()
 
-    # Mark Correctness & Log
+    # --- Mark Correctness & Log ---
     st.subheader("Mark Correctness")
     col1, col2 = st.columns([1, 2])
     with col1:
